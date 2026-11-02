@@ -1,13 +1,28 @@
 "use client";
-import {useEffect,useState} from "react";import Link from "next/link";import {usePathname} from "next/navigation";
-import {LayoutDashboard,Boxes,FolderOpen,Upload,Tag,LogOut,ScrollText,FileText,Users} from "lucide-react";
-const tabs=[["/","Dashboard",LayoutDashboard,"A"],["/boxes","Boxes",Boxes,"A"],["/projects","Projects",FolderOpen,"A"],["/import","Import data",Upload,"M"],["/labels","Labels",Tag,"S"],["/reports","Reports",FileText,"S"],["/audit","Audit log",ScrollText,"M"],["/users","Users",Users,"M"]] as const;
-export default function Shell(){const p=usePathname(),login=p==="/login",[me,setMe]=useState<{role?:string;email?:string}>({});
-useEffect(()=>{if(!login)fetch("/api/auth/me").then(r=>r.json()).then(j=>setMe(j)).catch(()=>{})},[login]);if(login)return null;
-const role=me.role||"";
-const show=(t:string)=>t==="A"||(t==="S"&&["System Manager","Supervisor"].includes(role))||(t==="M"&&role==="System Manager");
-const on=(h:string)=>h==="/"?p==="/":p===h||p.startsWith(h+"/");
-return <aside className="side"><div className="logo"><span className="mk"><img src="/intercom-logo-white.png" alt="Intercom"/></span><small>Archive records</small></div>
-<nav>{tabs.filter(t=>show(t[3])).map(([h,l,I])=><Link key={h} href={h} className={"tab"+(on(h)?" on":"")}><I size={18} strokeWidth={1.75}/>{l}</Link>)}</nav>
-<div className="who">{role&&<b>{me.email||"Signed in"}</b>}{role}</div>
-<button className="tab out" onClick={async()=>{await fetch("/api/auth/logout",{method:"POST"});location.href="/login"}}><LogOut size={18} strokeWidth={1.75}/>Log out</button></aside>}
+import {useEffect,useState} from "react";
+import Link from "next/link";
+import {usePathname} from "next/navigation";
+import {Archive,BarChart3,Boxes,FileText,History,LayoutDashboard,LogOut,Printer,UploadCloud,Users,Moon,Sun} from "lucide-react";
+const tabs=[
+ ["/","الرئيسية",LayoutDashboard,"A"],
+ ["/boxes","البوكسات",Boxes,"A"],
+ ["/projects","المشروعات",FileText,"A"],
+ ["/reports","التقارير",BarChart3,"S"],
+ ["/import","استيراد البيانات",UploadCloud,"M"],
+ ["/labels","الملصقات",Printer,"S"],
+ ["/audit","سجل العمليات",History,"M"],
+ ["/users","المستخدمون",Users,"M"]
+] as const;
+export default function Shell(){
+ const p=usePathname(),login=p==="/login",[me,setMe]=useState<{role?:string;email?:string}>({}),[dark,setDark]=useState(false);
+ useEffect(()=>{if(!login)fetch("/api/auth/me").then(r=>r.json()).then(j=>setMe(j)).catch(()=>{});const saved=localStorage.getItem("arms-theme");const d=saved?saved==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;setDark(d);document.documentElement.classList.toggle("dark",d);document.documentElement.classList.toggle("light",!d)},[login]);
+ if(login)return null;
+ const role=me.role||"";
+ const show=(t:string)=>t==="A"||(t==="S"&&["System Manager","Supervisor"].includes(role))||(t==="M"&&role==="System Manager");
+ const on=(h:string)=>h==="/"?p==="/":p===h||p.startsWith(h+"/");
+ return <header className="v2-topbar"><div className="v2-topbar-inner">
+  <Link href="/" className="v2-brand" aria-label="الرئيسية"><span className="v2-brand-icon"><Archive size={17}/></span><span className="v2-brand-copy"><b>Intercom</b><small>نظام إدارة الأرشيف</small></span></Link>
+  <nav className="v2-nav" aria-label="التنقل الرئيسي">{tabs.filter(t=>show(t[3])).map(([h,l,I])=><Link key={h} href={h} className={"v2-nav-item"+(on(h)?" active":"")}><I size={15} strokeWidth={1.9}/><span>{l}</span></Link>)}</nav>
+  <div className="v2-top-actions"><button className="v2-theme" title={dark?"الوضع الفاتح":"الوضع الداكن"} onClick={()=>{const next=!dark;setDark(next);document.documentElement.classList.toggle("dark",next);document.documentElement.classList.toggle("light",!next);localStorage.setItem("arms-theme",next?"dark":"light")}}>{dark?<Sun size={16}/>:<Moon size={16}/>}</button><span className="v2-user"><b>{me.email||"مستخدم النظام"}</b>{role&&<small>{role==="System Manager"?"مدير النظام":role==="Supervisor"?"مشرف":"موظف"}</small>}</span><button className="v2-logout" title="تسجيل الخروج" onClick={async()=>{await fetch("/api/auth/logout",{method:"POST"});location.href="/login"}}><LogOut size={16}/><span>خروج</span></button></div>
+ </div></header>
+}
