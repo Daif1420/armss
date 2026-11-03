@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useEffect,useMemo,useRef,useState} from "react";
-import {Search,Upload,Tag,FileText,Boxes as BoxesIcon,CheckCircle2,FolderOpen,Files,Layers} from "lucide-react";
+import {Search,FileUp,FileUp as Upload,Tags,FileText,Package as BoxesIcon,CheckCircle2,FolderKanban,Files,Layers} from "lucide-react";
 import {useApi,Status} from "../components/useApi";
 import ProjectModal from "../components/ProjectModal";
 
@@ -69,7 +69,7 @@ export default function Dashboard(){
   {empty&&<div className="msg err" role="alert">تم تحميل المشروعات، لكن أعداد المستندات والأوراق فارغة. افتح استيراد البيانات وارفع الملف مرة أخرى لاستكمال القيم الفارغة ومراجعة الأعمدة قبل التأكيد.</div>}
 
   <div className="kpis">
-   <Link href="/projects" className="k" style={{["--c" as any]:"var(--p)"}}><span><i><FolderOpen size={14} strokeWidth={2}/></i>المشروعات</span><b>{fmt(m.total)}</b><em>داخل النظام</em></Link>
+   <Link href="/projects" className="k" style={{["--c" as any]:"var(--p)"}}><span><i><FolderKanban size={14} strokeWidth={2}/></i>المشروعات</span><b>{fmt(m.total)}</b><em>داخل النظام</em></Link>
    <div className="k" style={{["--c" as any]:"var(--ok)"}}><span><i><CheckCircle2 size={14} strokeWidth={2}/></i>مكتمل</span><b>{fmt(m.done)}</b><em>{pct}% من إجمالي المشروعات</em></div>
    <div className="k" style={{["--c" as any]:"var(--warn)"}}><span><i><Files size={14} strokeWidth={2}/></i>المستندات</span><b>{fmt(m.docs)}</b><em>الإجمالي في الملفات المصدر</em></div>
    <div className="k" style={{["--c" as any]:"var(--ind)"}}><span><i><Layers size={14} strokeWidth={2}/></i>الأوراق</span><b>{fmt(m.sheets)}</b><em>الإجمالي في الملفات المصدر</em></div>
@@ -87,7 +87,7 @@ export default function Dashboard(){
    <div className="card"><div className="ch"><h2>آخر استيراد</h2><Link href="/import">استيراد ›</Link></div>
     {last?<><div style={{fontWeight:600,fontSize:16,unicodeBidi:"plaintext"}}>{last.file_name}</div><div className="sub" style={{margin:"2px 0 0"}}>{ago(last.created_at)} · {fmt(last.total_rows)} rows</div>
      <div className="legend" style={{marginTop:14}}><span>جديد <b>{fmt(last.new_rows)}</b></span><span>تم تعديلها <b>{fmt(last.changed_rows)}</b></span><span>مكررة <b>{fmt(last.duplicate_rows)}</b></span><span>أخطاء <b>{fmt(last.error_rows)}</b></span></div></>:<p className="sub" style={{margin:0}}>لا توجد عمليات استيراد حتى الآن.</p>}
-    <div className="acts"><Link href="/import"><Upload size={18} strokeWidth={1.75}/>استيراد البيانات</Link><Link href="/labels"><Tag size={18} strokeWidth={1.75}/>طباعة الملصقات</Link><Link href="/reports"><FileText size={18} strokeWidth={1.75}/>التقارير</Link><Link href="/boxes"><BoxesIcon size={18} strokeWidth={1.75}/>كل البوكسات</Link></div></div>
+    <div className="acts"><Link href="/import"><FileUp size={18} strokeWidth={1.75}/>استيراد البيانات</Link><Link href="/labels"><Tags size={18} strokeWidth={1.75}/>طباعة الملصقات</Link><Link href="/reports"><FileText size={18} strokeWidth={1.75}/>التقارير</Link><Link href="/boxes"><BoxesIcon size={18} strokeWidth={1.75}/>كل البوكسات</Link></div></div>
   </div>
 
   <h2>البوكسات</h2>
