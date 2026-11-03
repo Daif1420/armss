@@ -1,6 +1,6 @@
-import {NextResponse as R} from "next/server";import {session,db} from "../../../lib/server";
-export const runtime="nodejs";const ROLES=["System Manager","Supervisor","User"];
-function sm(req:Request){const u=session(req);return u&&u.role==="System Manager"?u:null}
+import {NextResponse as R} from "next/server";import {session,db,ROLES,ADMIN} from "../../../lib/server";
+export const runtime="nodejs";
+function sm(req:Request){const u=session(req);return u&&ADMIN.includes(u.role)?u:null}
 export async function GET(req:Request){if(!sm(req))return R.json({error:"Only a System Manager can manage users."},{status:403});const s=db();
  const {data:pr,error}=await s.from("profiles").select("id,full_name,role,created_at").order("created_at");if(error)return R.json({error:error.message},{status:500});
  const l=await s.auth.admin.listUsers({perPage:1000});const em=new Map((l.data?.users||[]).map(x=>[x.id,x.email]));

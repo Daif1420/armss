@@ -29,7 +29,7 @@ export async function importProjects(s:SupabaseClient,o:{fileName:string;sheetNa
  for(const it of o.items){
   const old=ex.get(it.job_id);
   if(!old){
-   nw++;upserts.push({job_id:it.job_id,job_name:it.job_name,branch_name:it.branch_name,total_boxes:it.total_boxes,total_documents:it.total_documents,total_sheets:it.total_sheets,date_of_delivery:it.date_of_delivery,source_payload:it.source_payload,import_state:"New",last_seen_import_id:importId,updated_at:now});
+   nw++;upserts.push({job_id:it.job_id,job_name:it.job_name,branch_name:it.branch_name,total_boxes:it.total_boxes,total_documents:it.total_documents,total_sheets:it.total_sheets,date_of_delivery:it.date_of_delivery,date_approved:it.date_of_delivery,source_payload:it.source_payload,import_state:"New",last_seen_import_id:importId,updated_at:now});
    log.push({import_id:importId,job_id:it.job_id,change_type:"New",before_data:null,incoming_data:it});continue}
   const diff=F.some(k=>!blank(old[k])&&!blank(it[k])&&!same(old[k],it[k]));
   const fill=F.some(k=>blank(old[k])&&!blank(it[k]));
@@ -40,7 +40,7 @@ export async function importProjects(s:SupabaseClient,o:{fileName:string;sheetNa
   else{
    if(fill){filled++;payload=it.source_payload}
    if(diff){changed++;state="Changed";type="Changed"}else unchanged++}
-  upserts.push({job_id:it.job_id,...merged,source_payload:payload,import_state:state,last_seen_import_id:importId,updated_at:now});
+  upserts.push({job_id:it.job_id,...merged,date_approved:merged.date_of_delivery,source_payload:payload,import_state:state,last_seen_import_id:importId,updated_at:now});
   log.push({import_id:importId,job_id:it.job_id,change_type:type,before_data:before,incoming_data:it});
  }
  // 4. write (upsert by job_id; status/box/dossier columns are not in the payload so they stay as they are)

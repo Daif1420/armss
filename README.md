@@ -37,3 +37,7 @@ This package includes `supabase/migrations/003_arms_requirements_alignment.sql` 
 - Expanded role values for System Admin, Archive Manager, Data Entry, and Viewer
 
 **Deployment:** Back up your Supabase database first, then apply this migration after `supabase/schema.sql`. Verify the archive ranges before applying because it creates expected project-slot records for configured boxes. Printed labels use English field text.
+
+## v2 code alignment (fix)
+Application code now matches migration 003: project statuses are `Archived / Pending / Missing`, dossier/box statuses are derived by the DB (`Pending|Inprogress|Archived`, `Inprogress|Archived`), and Force Close is a separate flag + `force_close_events` row (action `close` = force close, `reopen` = remove the flag). Imports and box creation call `arms_create_expected_slots` / `arms_recalculate_box`. Roles: System Manager/System Admin, Archive Manager, Data Entry, Supervisor, Viewer, User.
+Note: `arms_recalculate_box` re-derives project statuses from imported data, so manual status edits are overwritten on the next recalculation.

@@ -5,13 +5,13 @@ import {Search,FileUp,FileUp as Upload,Tags,FileText,Package as BoxesIcon,CheckC
 import {useApi,Status} from "../components/useApi";
 import ProjectModal from "../components/ProjectModal";
 
-const DONE=["Completed","Ready for Delivery","Delivered"];
-const ORDER:[string,string][]=[["Delivered","var(--ind)"],["Ready for Delivery","var(--teal)"],["Completed","var(--ok)"],["In Progress","var(--warn)"],["On Hold","var(--pur)"],["Pending","var(--mute)"],["Missing","var(--bad)"]];
-const labelStatus=(s:string)=>({Completed:"مكتمل",Missing:"مفقود",Delivered:"تم التسليم",Pending:"قيد الانتظار","In Progress":"قيد التنفيذ","Ready for Delivery":"جاهز للتسليم","On Hold":"متوقف"}[s]||s);
+const DONE=["Archived"];
+const ORDER:[string,string][]=[["Archived","var(--ok)"],["Pending","var(--mute)"],["Missing","var(--bad)"]];
+const labelStatus=(s:string)=>({Archived:"مؤرشف",Missing:"مفقود",Pending:"قيد الانتظار"} as any)[s]||s;
 const fmt=(n:number)=>Number(n||0).toLocaleString("en-US");
 const sum=(a:any[],k:string)=>a.reduce((t,x)=>t+(Number(x[k])||0),0);
 const ago=(iso:string)=>{const s=(Date.now()-new Date(iso).getTime())/1000;if(!(s>=0))return "";if(s<60)return "just now";if(s<3600)return Math.floor(s/60)+" min ago";if(s<86400)return Math.floor(s/3600)+" h ago";return Math.floor(s/86400)+" d ago"};
-const BOX_TONE:any={Open:"var(--p)","In Progress":"var(--warn)",Completed:"var(--ok)",Closed:"var(--mute)","Ready for Delivery":"var(--teal)",Delivered:"var(--ind)"};
+const BOX_TONE:any={Inprogress:"var(--warn)",Archived:"var(--ok)"};
 
 function Finder({rows,onPick}:{rows:any[];onPick:(p:any)=>void}){
  const [q,setQ]=useState(""),[i,setI]=useState(0),ref=useRef<HTMLInputElement>(null);
@@ -34,7 +34,7 @@ export default function Dashboard(){
   const cnt=(s:string)=>p.filter((x:any)=>x.status===s).length;
   const total=p.length,done=p.filter((x:any)=>DONE.includes(x.status)).length;
   const changed=p.filter((x:any)=>x.import_state==="Changed").length,unboxed=p.filter((x:any)=>!x.box).length;
-  const readyClose=(b||[]).filter((x:any)=>x.status!=="Closed"&&x.projects>0&&x.remaining===0&&x.missing===0&&x.reserved===0);
+  const readyClose=(b||[]).filter((x:any)=>x.force_closed);
   // branches
   const br=new Map<string,{n:number;d:number}>();for(const x of p){const k=x.branch_name||"No branch",v=br.get(k)||{n:0,d:0};v.n++;if(DONE.includes(x.status))v.d++;br.set(k,v)}
   const branches=Array.from(br,([name,v])=>({name,...v,left:v.n-v.d})).sort((a,c)=>c.left-a.left).slice(0,7);
@@ -43,7 +43,7 @@ export default function Dashboard(){
   for(const bx of b||[])cells.set(bx.box_code,Array.from({length:6},()=>({have:0,done:0,missing:0})));
   const first=new Map<string,number>((b||[]).map((x:any)=>[x.box_code,Number(x.first_job_id)]));
   for(const x of p){if(!x.box||!cells.has(x.box))continue;const f=first.get(x.box);if(!Number.isFinite(f))continue;const i=Math.min(5,Math.max(0,Math.floor((x.job_id-(f as number))/50))),c=cells.get(x.box)![i];c.have++;if(DONE.includes(x.status))c.done++;if(x.status==="Missing")c.missing++}
-  const shelf=[...(b||[])].sort((a:any,c:any)=>(a.status==="Closed"?1:0)-(c.status==="Closed"?1:0)||String(a.box_code).localeCompare(String(c.box_code),"en",{numeric:true}));
+  const shelf=[...(b||[])].sort((a:any,c:any)=>(a.status==="Archived"?1:0)-(c.status==="Archived"?1:0)||String(a.box_code).localeCompare(String(c.box_code),"en",{numeric:true}));
   return {cnt,total,done,changed,unboxed,readyClose,branches,cells,shelf,docs:sum(p,"total_documents"),sheets:sum(p,"total_sheets"),boxes:sum(p,"total_boxes")}},[p,b]);
 
  if(e)return <div className="msg err" role="alert">{e}</div>;
@@ -56,9 +56,7 @@ export default function Dashboard(){
  const todo=[
   {n:m.changed,t:"قيم مستوردة تم تعديلها",s:"راجع الاختلافات مقارنة بآخر عملية استيراد",h:"/projects?status=Changed",c:"var(--warn)"},
   {n:m.cnt("Missing"),t:"مشروعات مفقودة",s:"تم تحديدها كمفقودة في الأرشيف",h:"/projects?status=Missing",c:"var(--bad)"},
-  {n:m.cnt("On Hold"),t:"مشروعات متوقفة",s:"في انتظار اتخاذ قرار",h:"/projects?status=On%20Hold",c:"var(--pur)"},
-  {n:m.cnt("Ready for Delivery"),t:"جاهزة للتسليم",s:"اكتملت وفي انتظار التسليم",h:"/projects?status=Ready%20for%20Delivery",c:"var(--teal)"},
-  {n:m.readyClose.length,t:"بوكسات جاهزة للإغلاق",s:m.readyClose.slice(0,4).map((x:any)=>x.box_code).join(", ")+(m.readyClose.length>4?"…":""),h:"/boxes",c:"var(--ok)"},
+  {n:m.readyClose.length,t:"بوكسات مغلقة إجبارياً",s:m.readyClose.slice(0,4).map((x:any)=>x.box_code).join(", ")+(m.readyClose.length>4?"…":""),h:"/boxes",c:"var(--ok)"},
   {n:m.unboxed,t:"مشروعات غير مخصصة لبوكس",s:"قم بتوزيعها من صفحة البوكسات",h:"/boxes",c:"var(--p)"},
  ].filter(x=>x.n>0);
  const last=im?.[0];

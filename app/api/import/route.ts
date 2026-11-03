@@ -3,12 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 import * as XLSX from "xlsx";
 import {importProjects} from "../../../lib/importer";
 import {parseWorkbook} from "../../../lib/parse";
-import {session} from "../../../lib/server";import {allocate} from "../../../lib/alloc";
+import {session,recalcBoxes,EDITOR} from "../../../lib/server";import {allocate} from "../../../lib/alloc";
 
 export const runtime = "nodejs";
 export async function POST(req:Request){
  try{
-  const sess=session(req);if(!sess||sess.role!=="System Manager")return NextResponse.json({error:"Only a System Manager can import data."},{status:403});
+  const sess=session(req);if(!sess||!EDITOR.includes(sess.role))return NextResponse.json({error:"You do not have permission to import data."},{status:403});
   const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
   if(!url||!key)return NextResponse.json({error:"Server is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."},{status:503});
   const form=await req.formData();const file=form.get("file");
@@ -32,6 +32,7 @@ export async function POST(req:Request){
   try{data=await importProjects(supabase,{fileName:file.name,sheetName,items:normalized,rowCount:raw.length,duplicates,errors,apply:form.get("apply")==="1"})}
   catch(e:any){return NextResponse.json({error:"Database import failed",details:e?.message||String(e),row_errors:errors.slice(0,100)},{status:500})}
   let allocation:any[]=[];let allocError="";try{allocation=await allocate(supabase,sess.uid)}catch(e:any){allocError=e?.message||String(e)}
+  if(!allocError)allocError=await recalcBoxes(supabase);
   const tot=await supabase.from("projects").select("job_id",{count:"exact",head:true});const dbTotal=tot.count??null;
   return NextResponse.json({ok:true,db_total:dbTotal,alloc_error:allocError,allocation,file:file.name,sheet:sheetName,source_rows:raw.length,valid_unique_rows:normalized.length,duplicate_rows:duplicates.length,invalid_rows:errors.length,result:data,...diag,row_errors:errors.slice(0,100)});
  }catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Unexpected import error"},{status:400});}

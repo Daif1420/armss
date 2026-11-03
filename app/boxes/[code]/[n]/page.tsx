@@ -1,7 +1,7 @@
 "use client";
 import {useState} from "react";import Link from "next/link";import {useParams} from "next/navigation";
 import DataTable from "../../../../components/DataTable";import ProjectModal from "../../../../components/ProjectModal";import {useApi,Status} from "../../../../components/useApi";import {cols} from "../../../../components/cols";
-const DONE=["Completed","Ready for Delivery","Delivered"];
+const DONE=["Archived"];
 export default function DossierPage(){const {code,n}=useParams() as {code:string;n:string};const {d,e}=useApi("box&code="+code),[sel,setSel]=useState<any>(null);
  if(e)return <div className="msg err">{e}</div>;if(!d)return <div className="msg">جاري التحميل…</div>;
  const ds=d.dossiers.find((x:any)=>String(x.dossier_number)===n);

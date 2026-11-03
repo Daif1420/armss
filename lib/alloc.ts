@@ -14,7 +14,7 @@ export async function allocate(s:SupabaseClient,uid?:string){
   if(!groups.has(k))groups.set(k,[]);groups.get(k)!.push(id);out[code]=(out[code]||0)+1}
  const res:any[]=[];
  for(const code of Object.keys(out)){const bFirst=RULE.startJobId+(num(code)-RULE.firstBox)*RULE.boxSize;let b=boxes.get(code);
-  if(!b){const ins:any=await s.from("archive_boxes").insert({box_code:code,first_job_id:bFirst,last_job_id:bFirst+RULE.boxSize-1}).select("id").single();if(ins.error){res.push({code,skipped:ins.error.message});continue}b=ins.data;
+  if(!b){const ins:any=await s.from("archive_boxes").insert({box_code:code,first_job_id:bFirst,last_job_id:bFirst+RULE.boxSize-1}).select("id").single();if(ins.error){res.push({code,skipped:ins.error.message});continue}b=ins.data;await s.rpc("arms_create_expected_slots",{p_box_id:b.id});
    await s.from("audit_logs").insert({actor_id:uid??null,action:"Box created (auto allocation)",entity_type:"box",entity_id:code,after_data:{rule:RULE}})}
   for(const [k,ids] of Array.from(groups.entries())){if(!k.startsWith(code+"|"))continue;const dn=Number(k.split("|")[1]),dFirst=bFirst+(dn-1)*RULE.dossierSize;
    let {data:d}:any=await s.from("dossiers").select("id").eq("box_id",b.id).eq("dossier_number",dn).maybeSingle();

@@ -1,7 +1,7 @@
 "use client";
 import {useMemo,useState} from "react";import {Status} from "./useApi";import * as XLSX from "xlsx";
 export type Col={k:string;l:string;num?:boolean;st?:boolean};
-const STATUS_LABELS:any={Completed:"مكتمل",Delivered:"تم التسليم","Ready for Delivery":"جاهز للتسليم",Missing:"مفقود","On Hold":"متوقف","In Progress":"قيد التنفيذ",Pending:"قيد الانتظار",Open:"مفتوح",Closed:"مغلق",Reserved:"محجوز"};
+const STATUS_LABELS:any={Archived:"مؤرشف",Inprogress:"قيد التنفيذ",Missing:"مفقود",Pending:"قيد الانتظار",Reserved:"محجوز"};
 export default function DataTable({cols,rows,fk,init="",onRow}:{cols:Col[];rows:any[];fk?:string;init?:string;onRow?:(r:any)=>void}){
 const [q,setQ]=useState(""),[f,setF]=useState(init),[sk,setSk]=useState(""),[asc,setAsc]=useState(true),[pg,setPg]=useState(0);const N=25;
 const opts=useMemo(()=>fk?Array.from(new Set(rows.map(r=>r[fk]).filter(Boolean))).sort():[],[rows,fk]);
