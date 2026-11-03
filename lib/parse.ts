@@ -25,7 +25,7 @@ const ALIASES: Record<Field, string[]> = {
   total_boxes: ["Total Boxes", "Total Box", "Boxes", "No of Boxes", "عدد الصناديق", "اجمالي الصناديق", "اجمالي عدد الصناديق", "عدد العلب", "اجمالي العلب"],
   total_documents: ["Total Documents", "Total Document", "Documents", "Total Docs", "No of Documents", "عدد المستندات", "اجمالي المستندات", "اجمالي عدد المستندات", "عدد الوثائق", "اجمالي الوثائق"],
   total_sheets: ["Total Sheets", "Total Sheet", "Sheets", "No of Sheets", "عدد الاوراق", "اجمالي الاوراق", "اجمالي عدد الاوراق", "عدد الصفحات", "اجمالي الصفحات"],
-  date_of_delivery: ["Date Of Delivery", "Date Delivery", "Delivery Date", "Date Print", "Print Date", "تاريخ التسليم", "تاريخ الطباعه", "تاريخ الطباعة"],
+  date_of_delivery: ["Date Approved", "date delivery", "Date Of Delivery", "Date Delivery", "Delivery Date", "Date Print", "Print Date", "تاريخ التسليم", "تاريخ الطباعه", "تاريخ الطباعة"],
 };
 const ALIAS_CANON: Record<Field, Set<string>> = Object.fromEntries(
   FIELDS.map(f => [f, new Set(ALIASES[f].map(canon))])
