@@ -1,0 +1,5 @@
+{
+  "name": "ARMS – Archive Reports Management System",
+  "description": "Enterprise archive management system with 300-project box tracking, 50-project dossiers, Excel import engine, and thermal label generator.",
+  "requestFramePermissions": []
+}
